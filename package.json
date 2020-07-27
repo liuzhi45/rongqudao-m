@@ -15,7 +15,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "element-ui": "^2.10.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "vue": "^2.5.2",
     "vue-awesome-mui": "^1.7.3",
     "vue-particles": "^1.0.9",
