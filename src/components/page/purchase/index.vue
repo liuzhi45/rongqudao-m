@@ -4,42 +4,26 @@
       <section>
         <h3>自动加好友功能</h3>
         <div class="price-list">
-          <div class="price-info price-active">
-            <p class="price-info-title">1个月</p>
-            <div>¥10</div>
-            <p class="price-info-tips">仅需0.3元/天</p>
-          </div>
-          <div class="price-info">
-            <p class="price-info-title">6个月</p>
-            <div>¥10</div>
-            <p class="price-info-tips price-overdue">¥80</p>
-            <span class="price-info-reco">推荐</span>
-          </div>
-          <div class="price-info">
-            <p class="price-info-title">1年</p>
-            <div>¥10</div>
-            <p class="price-info-tips">¥120</p>
+          <div class="price-info" v-for="autoFriend in priceInfo.imFriend" :key="autoFriend.id"
+               :class="{ 'price-active': friendIdx === autoFriend.id }" @click="selFriendPrice(autoFriend.id)">
+            <p class="price-info-title" v-text="getTimeInfo(autoFriend)"></p>
+            <div>¥{{autoFriend.specialPrice}}</div>
+            <p v-if="autoFriend.serviceTimeType === 'M' && autoFriend.serviceTime === 1"
+               class="price-info-tips">仅需{{autoFriend.dayPrice}}元/天</p>
+            <p v-else class="price-info-tips price-overdue">{{autoFriend.amount}}</p>
           </div>
         </div>
       </section>
       <section>
         <h3>自动群发功能</h3>
         <div class="price-list">
-          <div class="price-info price-active">
-            <p class="price-info-title">1个月</p>
-            <div>¥10</div>
-            <p class="price-info-tips">仅需0.3元/天</p>
-          </div>
-          <div class="price-info">
-            <p class="price-info-title">6个月</p>
-            <div>¥10</div>
-            <p class="price-info-tips">仅需0.3元/天</p>
-            <span class="price-info-reco">推荐</span>
-          </div>
-          <div class="price-info">
-            <p class="price-info-title">1年</p>
-            <div>¥10</div>
-            <p class="price-info-tips">仅需0.3元/天</p>
+          <div class="price-info"  v-for="autoMsg in priceInfo.imMessage" :key="autoMsg.id"
+               :class="{ 'price-active': msgIdx === autoMsg.id }" @click="selMsgPrice(autoMsg.id)">
+            <p class="price-info-title" v-text="getTimeInfo(autoMsg)"></p>
+            <div>¥{{autoMsg.specialPrice}}</div>
+            <p v-if="autoMsg.serviceTimeType === 'M' && autoMsg.serviceTime === 1"
+               class="price-info-tips">仅需{{autoMsg.dayPrice}}元/天</p>
+            <p v-else class="price-info-tips price-overdue">{{autoMsg.amount}}</p>
           </div>
         </div>
       </section>
@@ -67,7 +51,13 @@
   </div>
 </template>
 <script>
+import { Toast } from 'mint-ui'
+import api from '@/assets/js/api'
+import md5 from 'js-md5'
+import { formatTime } from '@/assets/js/filter'
+import { UrlSearch } from '@/assets/js/utils'
 import weixinSrc from '@/assets/img/purchase/weixin.png'
+import { PRICE_LIST } from '@/assets/js/urlConfig'
 import 'vant/lib/index.css'
 import Vue from 'vue'
 import { Cell, CellGroup, RadioGroup, Radio, Button } from 'vant'
@@ -88,14 +78,60 @@ export default {
         }
       ],
       payType: 'weixin',
-      weixinSrc
+      weixinSrc,
+      userInfo: {
+        signature: '',
+        requestTime: '',
+        token: ''
+      },
+      priceInfo: {},
+      friendIdx: '',
+      msgIdx: ''
+    }
+  },
+  computed: {
+    getTimeInfo (info) {
+      return function (info) {
+        if (info.serviceTimeType === 'Y') {
+          return info.serviceTime + '年'
+        } else if (info.serviceTimeType === 'M') {
+          return info.serviceTime + '个月'
+        } else {
+          return info.serviceTime + '天'
+        }
+      }
     }
   },
   components: {
   },
   mounted () {
+    // 2077a775842c0e6476f919669359d461fba
+    this.userInfo.token = new UrlSearch().token // 从url中获取
+    this.prizeCode = new UrlSearch().prizeCode // 从url中获取
+    this.getPriceList()
   },
   methods: {
+    getPriceList () {
+      this.userInfo.requestTime = formatTime(new Date(), 'YYYYMMDDHHmmss')
+      this.userInfo.signature = md5(this.userInfo.requestTime + this.prizeCode)
+      api.post2Form({url: PRICE_LIST, params: this.userInfo}).then(
+        res => {
+          if (res.error.returnCode === 0) {
+            this.priceInfo = res.data
+          } else {
+            Toast(res.error.returnMessage)
+          }
+        },
+        (e, res) => {
+          console.log(e, res)
+        })
+    }
+  },
+  selFriendPrice (friendId) {
+    this.friendIdx = friendId
+  },
+  selMsgPrice (msgId) {
+    this.msgIdx = msgId
   }
 }
 </script>
