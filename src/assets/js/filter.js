@@ -53,3 +53,12 @@ export function channelType (val) {
 export function utilType (val) {
   return UTIL_TYPE[val]
 }
+export function showTimeType (time, type) {
+  let str = '天'
+  if (type === 'Y') {
+    str = '年'
+  } else if (type === 'M') {
+    str = '个月'
+  }
+  return time + str
+}
