@@ -46,7 +46,7 @@
         <div>总计：<span>¥{{totalMoney}}</span></div>
         <p>已选自动加好友: {{selFriInfo.time}}；自动群发: {{selMsgInfo.time}}</p>
       </div>
-      <van-button type="danger" :disabled="submitDisFlag" @click="handelPay">立即购买</van-button>
+      <van-button type="danger" :disabled="submitDisFlag || (!friendIdx && !msgIdx)" @click="handelPay">立即购买</van-button>
     </div>
   </div>
 </template>
@@ -57,7 +57,7 @@ import md5 from 'js-md5'
 import { formatTime, showTimeType } from '@/assets/js/filter'
 import { UrlSearch } from '@/assets/js/utils'
 import weixinSrc from '@/assets/img/purchase/weixin.png'
-import { PRICE_LIST } from '@/assets/js/urlConfig'
+import { PRICE_LIST, PRICE_PAY } from '@/assets/js/urlConfig'
 import 'vant/lib/index.css'
 import Vue from 'vue'
 import { Cell, CellGroup, RadioGroup, Radio, Button } from 'vant'
@@ -98,6 +98,7 @@ export default {
         money: ''
       },
       submitDisFlag: false,
+      orderNo: '',
       weChatParameter: {}
     }
   },
@@ -141,17 +142,21 @@ export default {
       this.selMsgInfo.time = showTimeType(msgObj.serviceTime, msgObj.serviceTimeType)
     },
     handelPay () {
-      let money = this.selFriInfo.money + this.selMsgInfo.money
-      let params = {
-        money: money
-      } // 根据后端所需传参数
+      let proIds = this.friendIdx ? this.friendIdx : ''
+      if (this.msgIdx) {
+        if (proIds) {
+          proIds += ','
+        }
+        proIds += this.msgIdx
+      }
       this.submitDisFlag = true // 防止用户点击多次
       this.userInfo.requestTime = formatTime(new Date(), 'YYYYMMDDHHmmss')
       this.userInfo.signature = md5(this.userInfo.requestTime + this.prizeCode)
-      api.post2Form({url: PRICE_LIST, params: Object.assign({payChannel: 20, proIds: ''}, this.userInfo)}).then(
+      api.post2Form({url: PRICE_PAY, params: Object.assign({payChannel: 20, proIds}, this.userInfo)}).then(
         res => {
           if (res.error.returnCode === 0) {
-            this.weChatParameter = res.data
+            this.orderNo = res.data.orderNo
+            this.weChatParameter = res.data.payInfo
             this.weixinPay()
           } else {
             Toast(res.error.returnMessage)
@@ -183,12 +188,12 @@ export default {
       WeixinJSBridge.invoke(
         'getBrandWCPayRequest', {
           debug: false,
-          'appId': that.weChatParameter.appId, // 公众号名称，由商户传入
-          'timeStamp': timestamp, // 时间戳，自1970年以来的秒数
-          'nonceStr': that.weChatParameter.nonceStr, // 随机串
+          'appId': that.weChatParameter.appid, // 公众号名称，由商户传入
+          'timeStamp': that.weChatParameter.timestamp, // 时间戳，自1970年以来的秒数
+          'nonceStr': that.weChatParameter.noncestr, // 随机串
           'package': that.weChatParameter.package,
-          'signType': that.weChatParameter.signType, // 微信签名方式：
-          'paySign': that.weChatParameter.paySign, // 微信签名
+          // 'signType': that.weChatParameter.signType, // 微信签名方式：
+          'paySign': that.weChatParameter.sign, // 微信签名
           jsApiList: [
             'chooseWXPay'
           ]
