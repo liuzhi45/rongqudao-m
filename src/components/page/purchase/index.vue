@@ -48,10 +48,14 @@
       </div>
       <van-button type="danger" :disabled="submitDisFlag || (!friendIdx && !msgIdx)" @click="handelPay">立即购买</van-button>
     </div>
+    <van-dialog v-model="show" title="请确认微信支付是否已完成" :show-confirm-button="false">
+      <div class="pay-result pay-success">已完成支付</div>
+      <div class="pay-result">支付遇到问题，重新支付</div>
+    </van-dialog>
   </div>
 </template>
 <script>
-import { Toast } from 'mint-ui'
+// import { Toast } from 'mint-ui'
 import api from '@/assets/js/api'
 import md5 from 'js-md5'
 import { formatTime, showTimeType } from '@/assets/js/filter'
@@ -60,17 +64,20 @@ import weixinSrc from '@/assets/img/purchase/weixin.png'
 import { PRICE_LIST, PRICE_PAY } from '@/assets/js/urlConfig'
 import 'vant/lib/index.css'
 import Vue from 'vue'
-import { Cell, CellGroup, RadioGroup, Radio, Button } from 'vant'
+import { Cell, CellGroup, RadioGroup, Radio, Button, Dialog, Toast } from 'vant'
 Vue.use(Cell)
 Vue.use(CellGroup)
 Vue.use(Radio)
 Vue.use(RadioGroup)
 Vue.use(Button)
+Vue.use(Toast)
+// Vue.use(Dialog)
 
 export default {
   name: 'payment',
   data () {
     return {
+      show: false,
       money: '',
       options: [
         {
@@ -108,6 +115,7 @@ export default {
     }
   },
   components: {
+    vanDialog: Dialog.Component
   },
   mounted () {
     // 2077a775842c0e6476f919669359d461fba
@@ -157,7 +165,13 @@ export default {
           if (res.error.returnCode === 0) {
             this.orderNo = res.data.orderNo
             this.weChatParameter = res.data.payInfo
-            this.weixinPay()
+            const ua = navigator.userAgent.toLowerCase() // 判断当前环境
+            if (ua.match(/MicroMessenger/i) === 'micromessenger') { // 微信
+              this.weixinPay()
+            } else { // 其他浏览器
+              // this.weixinH5Pay()
+              // window.location.href = res.data.mweb_url + '&redirect_url=https://www.baidu.com'
+            }
           } else {
             Toast(res.error.returnMessage)
           }
@@ -165,6 +179,14 @@ export default {
         (e, res) => {
           console.log(e, res)
         })
+    },
+    weixinH5Pay () {
+      const that = this
+      setTimeout(function () {
+        that.show = true
+      }, 1000)
+      // setCookie('h5weixinpay', '1', 1) // 1表示没有弹窗,0表示弹窗了,存贮一天（判断是否出弹窗）
+      window.location.href = that.weChatParameter.mweb_url + '&redirect_url=https://www.baidu.com' // 此处写上需要跳转的url(此处的url需要和当前页面的url区分开来，以此来判断如果是这个链接就出弹窗，然后用存的
     },
     /* eslint-disable */
     // 解决微信内置对象报错
@@ -337,5 +359,22 @@ export default {
         line-height: 18px;
       }
     }
+  }
+  /deep/ .van-dialog{
+    border-radius: 8px;
+  }
+  .pay-result{
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid #E3E3E3;
+  }
+  .pay-success{
+    color: red;
+  }
+  /deep/ .van-dialog__header{
+    line-height: 68px;
+    padding-top: 0;
   }
 </style>
