@@ -20,5 +20,5 @@ export let GET_LUCK_NUM = '/app/user/luckDrawTimes'
 export const PRICE_LIST = '/app/user/im/price'
 // 获取服务价格
 export const PRICE_PAY = '/app/user/im/pay'
-// 获取服务价格
-export const PRICE_RESULT = '/rongqd/user/product/getPayResult'
+// 查询支付结果
+export const PRICE_RESULT = '/app/user/product/getPayResult'

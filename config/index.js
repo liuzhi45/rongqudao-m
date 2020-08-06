@@ -10,7 +10,18 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      // '/app': { // 代理url关键字
+      //   target: 'http://114.67.84.197:8080/rongqd', // 需要代理的地址
+      //   secure: false, // 如果是https接口，需要配置这个参数
+      //   changeOrigin: true, // 是否跨域
+      //   // 突破host和origin的限制
+      //   headers: {
+      //     referer: 'http://www.rongqudao.com/',
+      //     origin: 'http://www.rongqudao.com/'
+      //   }
+      // }
+    },
 
     // Various Dev Server settings
     host: '0.0.0.0', // can be overwritten by process.env.HOST

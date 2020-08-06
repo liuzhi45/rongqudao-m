@@ -9,11 +9,11 @@ import '../node_modules/mint-ui/lib/style.min.css' // mint-ui
 import store from './vuex/store'
 import * as filters from './assets/js/filter'
 import 'lib-flexible/flexible'
-// import Vconsole from 'vconsole'
+import Vconsole from 'vconsole'
 
 Vue.use(MintUI)
-// let vConsole = new Vconsole()
-// Vue.use(vConsole)
+let vConsole = new Vconsole()
+Vue.use(vConsole)
 
 // 遍历过滤器
 Object.keys(filters).forEach(key => {

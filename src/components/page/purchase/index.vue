@@ -209,13 +209,13 @@ export default {
         res => {
           if (res.error.returnCode === 0) {
             let status = res.data.payStatus
-            if (status === 20) { // 成功
+            if (status === '20') { // 成功
               this.show = false
               this.isNoPay = false
-            } else if (status === 30) { // 失败
+            } else if (status === '30') { // 失败
               Toast('支付失败，请重新支付')
               this.show = false
-            } else if (status === 50) { // 处理中
+            } else if (status === '50') { // 处理中
               Toast('正在处理中，请稍后再试')
             }
           }
