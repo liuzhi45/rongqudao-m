@@ -1,57 +1,67 @@
 <template>
   <div class="buy-page">
-    <div class="price-block">
-      <section>
-        <h3>自动加好友功能</h3>
-        <div class="price-list">
-          <div class="price-info" v-for="autoFriend in priceInfo.imFriend" :key="autoFriend.id"
-               :class="{ 'price-active': friendIdx === autoFriend.id }" @click="selFriendPrice(autoFriend)">
-            <p class="price-info-title" v-text="$options.filters.showTimeType(autoFriend.serviceTime, autoFriend.serviceTimeType)"></p>
-            <div>¥{{autoFriend.specialPrice}}</div>
-            <p v-if="autoFriend.serviceTimeType === 'M' && autoFriend.serviceTime === 1"
-               class="price-info-tips">仅需{{autoFriend.dayPrice}}元/天</p>
-            <p v-else class="price-info-tips price-overdue">{{autoFriend.amount}}</p>
+    <template v-if="isNoPay">
+      <div class="price-block">
+        <section>
+          <h3>自动加好友功能</h3>
+          <div class="price-list">
+            <div class="price-info" v-for="autoFriend in priceInfo.imFriend" :key="autoFriend.id"
+                 :class="{ 'price-active': friendIdx === autoFriend.id }" @click="selFriendPrice(autoFriend)">
+              <p class="price-info-title" v-text="$options.filters.showTimeType(autoFriend.serviceTime, autoFriend.serviceTimeType)"></p>
+              <div>¥{{autoFriend.specialPrice}}</div>
+              <p v-if="autoFriend.serviceTimeType === 'M' && autoFriend.serviceTime === 1"
+                 class="price-info-tips">仅需{{autoFriend.dayPrice}}元/天</p>
+              <p v-else class="price-info-tips price-overdue">{{autoFriend.amount}}</p>
+            </div>
           </div>
-        </div>
-      </section>
-      <section>
-        <h3>自动群发功能</h3>
-        <div class="price-list">
-          <div class="price-info"  v-for="autoMsg in priceInfo.imMessage" :key="autoMsg.id"
-               :class="{ 'price-active': msgIdx === autoMsg.id }" @click="selMsgPrice(autoMsg)">
-            <p class="price-info-title" v-text="$options.filters.showTimeType(autoMsg.serviceTime, autoMsg.serviceTimeType)"></p>
-            <div>¥{{autoMsg.specialPrice}}</div>
-            <p v-if="autoMsg.serviceTimeType === 'M' && autoMsg.serviceTime === 1"
-               class="price-info-tips">仅需{{autoMsg.dayPrice}}元/天</p>
-            <p v-else class="price-info-tips price-overdue">{{autoMsg.amount}}</p>
+        </section>
+        <section>
+          <h3>自动群发功能</h3>
+          <div class="price-list">
+            <div class="price-info"  v-for="autoMsg in priceInfo.imMessage" :key="autoMsg.id"
+                 :class="{ 'price-active': msgIdx === autoMsg.id }" @click="selMsgPrice(autoMsg)">
+              <p class="price-info-title" v-text="$options.filters.showTimeType(autoMsg.serviceTime, autoMsg.serviceTimeType)"></p>
+              <div>¥{{autoMsg.specialPrice}}</div>
+              <p v-if="autoMsg.serviceTimeType === 'M' && autoMsg.serviceTime === 1"
+                 class="price-info-tips">仅需{{autoMsg.dayPrice}}元/天</p>
+              <p v-else class="price-info-tips price-overdue">{{autoMsg.amount}}</p>
+            </div>
           </div>
-        </div>
-      </section>
-    </div>
-    <div class="gray-block"></div>
-    <div class="price-block pay-type">
-      <h3>支付方式</h3>
-      <van-radio-group v-model="payType">
-        <van-cell-group>
-          <van-cell title="微信" :icon="weixinSrc" clickable @click="payType = 'weixin'">
-            <template #right-icon>
-              <van-radio name="weixin" />
-            </template>
-          </van-cell>
-        </van-cell-group>
-      </van-radio-group>
-    </div>
-    <div class="buy-now">
-      <div class="buy-now-left">
-        <div>总计：<span>¥{{totalMoney}}</span></div>
-        <p>已选自动加好友: {{selFriInfo.time}}；自动群发: {{selMsgInfo.time}}</p>
+        </section>
       </div>
-      <van-button type="danger" :disabled="submitDisFlag || (!friendIdx && !msgIdx)" @click="handelPay">立即购买</van-button>
-    </div>
-    <van-dialog v-model="show" title="请确认微信支付是否已完成" :show-confirm-button="false">
-      <div class="pay-result pay-success">已完成支付</div>
-      <div class="pay-result">支付遇到问题，重新支付</div>
-    </van-dialog>
+      <div class="gray-block"></div>
+      <div class="price-block pay-type">
+        <h3>支付方式</h3>
+        <van-radio-group v-model="payType">
+          <van-cell-group>
+            <van-cell title="微信" :icon="weixinSrc" clickable @click="payType = 'weixin'">
+              <template #right-icon>
+                <van-radio name="weixin" />
+              </template>
+            </van-cell>
+          </van-cell-group>
+        </van-radio-group>
+      </div>
+      <div class="buy-now">
+        <div class="buy-now-left">
+          <div>总计：<span>¥{{totalMoney}}</span></div>
+          <p>已选自动加好友: {{selFriInfo.time}}；自动群发: {{selMsgInfo.time}}</p>
+        </div>
+        <van-button type="danger" :disabled="submitDisFlag || (!friendIdx && !msgIdx)" @click="handelPay">立即购买</van-button>
+      </div>
+      <van-dialog v-model="show" title="请确认微信支付是否已完成" :show-confirm-button="false">
+        <div class="pay-result pay-success" @click="paySuccess">已完成支付</div>
+        <div class="pay-result" @click="show = false">支付遇到问题，重新支付</div>
+      </van-dialog>
+    </template>
+    <template v-if="!isNoPay">
+      <div class="pay-status">
+        <div>
+          <van-icon name="success" color="#1989fa" size="1rem"/>支付成功
+        </div>
+        <van-button type="info">返回</van-button>
+      </div>
+    </template>
   </div>
 </template>
 <script>
@@ -61,22 +71,25 @@ import md5 from 'js-md5'
 import { formatTime, showTimeType } from '@/assets/js/filter'
 import { UrlSearch } from '@/assets/js/utils'
 import weixinSrc from '@/assets/img/purchase/weixin.png'
-import { PRICE_LIST, PRICE_PAY } from '@/assets/js/urlConfig'
+import { PRICE_LIST, PRICE_PAY, PRICE_RESULT } from '@/assets/js/urlConfig'
 import 'vant/lib/index.css'
 import Vue from 'vue'
-import { Cell, CellGroup, RadioGroup, Radio, Button, Dialog, Toast } from 'vant'
+import { Cell, CellGroup, RadioGroup, Radio, Button, Dialog, Toast, Icon } from 'vant'
 Vue.use(Cell)
 Vue.use(CellGroup)
 Vue.use(Radio)
 Vue.use(RadioGroup)
 Vue.use(Button)
 Vue.use(Toast)
+Vue.use(Icon)
 // Vue.use(Dialog)
 
 export default {
   name: 'payment',
   data () {
     return {
+      userIp: '',
+      isNoPay: true,
       show: false,
       money: '',
       options: [
@@ -122,6 +135,13 @@ export default {
     this.userInfo.token = new UrlSearch().token // 从url中获取
     this.prizeCode = new UrlSearch().prizeCode // 从url中获取
     this.getPriceList()
+    if (new UrlSearch().isPay) {
+      this.show = true
+    }
+    // 获取客户端ip
+    this.userIp = localStorage.getItem('Ip')
+    // 在控制台打印客户端ip
+    console.info(this.userIp)
   },
   methods: {
     getPriceList () {
@@ -160,7 +180,7 @@ export default {
       this.submitDisFlag = true // 防止用户点击多次
       this.userInfo.requestTime = formatTime(new Date(), 'YYYYMMDDHHmmss')
       this.userInfo.signature = md5(this.userInfo.requestTime + this.prizeCode)
-      api.post2Form({url: PRICE_PAY, params: Object.assign({payChannel: 20, proIds}, this.userInfo)}).then(
+      api.post2Form({url: PRICE_PAY, params: Object.assign({payChannel: 20, proIds, isH5: true, userIp: this.userIp}, this.userInfo)}).then(
         res => {
           if (res.error.returnCode === 0) {
             this.orderNo = res.data.orderNo
@@ -169,7 +189,7 @@ export default {
             if (ua.match(/MicroMessenger/i) === 'micromessenger') { // 微信
               this.weixinPay()
             } else { // 其他浏览器
-              // this.weixinH5Pay()
+              this.weixinH5Pay()
               // window.location.href = res.data.mweb_url + '&redirect_url=https://www.baidu.com'
             }
           } else {
@@ -180,13 +200,30 @@ export default {
           console.log(e, res)
         })
     },
+    paySuccess () {
+      this.isNoPay = true
+      // 调查询订单信息
+      this.userInfo.requestTime = formatTime(new Date(), 'YYYYMMDDHHmmss')
+      this.userInfo.signature = md5(this.userInfo.requestTime + this.prizeCode)
+      api.post2Form({ url: PRICE_RESULT, params: Object.assign({ orderNo: this.orderNo }, this.userInfo) }).then(
+        res => {
+          if (res.error.returnCode === 0) {
+            let status = res.data.payStatus
+            if (status === 20) { // 成功
+              this.show = false
+              this.isNoPay = false
+            } else if (status === 30) { // 失败
+              Toast('支付失败，请重新支付')
+              this.show = false
+            } else if (status === 50) { // 处理中
+              Toast('正在处理中，请稍后再试')
+            }
+          }
+        })
+    },
     weixinH5Pay () {
-      const that = this
-      setTimeout(function () {
-        that.show = true
-      }, 1000)
       // setCookie('h5weixinpay', '1', 1) // 1表示没有弹窗,0表示弹窗了,存贮一天（判断是否出弹窗）
-      window.location.href = that.weChatParameter.mweb_url + '&redirect_url=https://www.baidu.com' // 此处写上需要跳转的url(此处的url需要和当前页面的url区分开来，以此来判断如果是这个链接就出弹窗，然后用存的
+      window.location.replace(this.weChatParameter.mweb_url + '&redirect_url=' + encodeURIComponent(window.location.href + '&isPay=true'))
     },
     /* eslint-disable */
     // 解决微信内置对象报错
@@ -376,5 +413,17 @@ export default {
   /deep/ .van-dialog__header{
     line-height: 68px;
     padding-top: 0;
+  }
+  .pay-status{
+    margin: 100px auto;
+    width: 200px;
+    font-size: 20px;
+    text-align: center;
+    div{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
   }
 </style>
