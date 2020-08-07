@@ -184,6 +184,7 @@ export default {
         res => {
           if (res.error.returnCode === 0) {
             this.orderNo = res.data.orderNo
+            sessionStorage.setItem('orderInfo', this.orderNo)
             this.weChatParameter = res.data.payInfo
             const ua = navigator.userAgent.toLowerCase() // 判断当前环境
             if (ua.match(/MicroMessenger/i) === 'micromessenger') { // 微信
@@ -205,7 +206,8 @@ export default {
       // 调查询订单信息
       this.userInfo.requestTime = formatTime(new Date(), 'YYYYMMDDHHmmss')
       this.userInfo.signature = md5(this.userInfo.requestTime + this.prizeCode)
-      api.post2Form({ url: PRICE_RESULT, params: Object.assign({ orderNo: this.orderNo }, this.userInfo) }).then(
+      const orderInfo = sessionStorage.getItem('orderInfo')
+      api.post2Form({ url: PRICE_RESULT, params: Object.assign({ orderNo: orderInfo }, this.userInfo) }).then(
         res => {
           if (res.error.returnCode === 0) {
             let status = res.data.payStatus
