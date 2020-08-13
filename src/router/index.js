@@ -12,6 +12,7 @@ const register = () => import(/* webpackChunkName: "register" */ '@/components/p
 const invite = () => import(/* webpackChunkName: "invite" */ '@/components/page/lottery/invite')
 const error = () => import(/* webpackChunkName: "error" */ '@/components/page/lottery/error')
 const purchase = () => import(/* webpackChunkName: "purchase" */ '@/components/page/purchase')
+const buyProduct = () => import(/* webpackChunkName: "purchase" */ '@/components/page/purchase/buy-product')
 
 const router = new Router({
   mode: 'history',
@@ -64,6 +65,15 @@ const router = new Router({
       path: '/purchase',
       name: 'purchase',
       component: purchase,
+      meta: {
+        isNeedLogin: false,
+        isNeedParam: false
+      }
+    },
+    {
+      path: '/buy-product',
+      name: 'buy-product',
+      component: buyProduct,
       meta: {
         isNeedLogin: false,
         isNeedParam: false

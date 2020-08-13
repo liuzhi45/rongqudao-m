@@ -65,7 +65,6 @@
   </div>
 </template>
 <script>
-// import { Toast } from 'mint-ui'
 import api from '@/assets/js/api'
 import md5 from 'js-md5'
 import { formatTime, showTimeType } from '@/assets/js/filter'
@@ -73,16 +72,7 @@ import { UrlSearch } from '@/assets/js/utils'
 import weixinSrc from '@/assets/img/purchase/weixin.png'
 import { PRICE_LIST, PRICE_PAY, PRICE_RESULT } from '@/assets/js/urlConfig'
 import 'vant/lib/index.css'
-import Vue from 'vue'
-import { Cell, CellGroup, RadioGroup, Radio, Button, Dialog, Toast, Icon } from 'vant'
-Vue.use(Cell)
-Vue.use(CellGroup)
-Vue.use(Radio)
-Vue.use(RadioGroup)
-Vue.use(Button)
-Vue.use(Toast)
-Vue.use(Icon)
-// Vue.use(Dialog)
+import { Dialog } from 'vant'
 
 export default {
   name: 'payment',
@@ -141,7 +131,7 @@ export default {
     // 获取客户端ip
     this.userIp = localStorage.getItem('Ip')
     // 在控制台打印客户端ip
-    console.info(this.userIp)
+    // console.info(this.userIp)
   },
   methods: {
     getPriceList () {
@@ -152,7 +142,7 @@ export default {
           if (res.error.returnCode === 0) {
             this.priceInfo = res.data
           } else {
-            Toast(res.error.returnMessage)
+            this.$toast(res.error.returnMessage)
           }
         },
         (e, res) => {
@@ -194,7 +184,7 @@ export default {
               // window.location.href = res.data.mweb_url + '&redirect_url=https://www.baidu.com'
             }
           } else {
-            Toast(res.error.returnMessage)
+            this.$toast(res.error.returnMessage)
           }
         },
         (e, res) => {
@@ -215,10 +205,10 @@ export default {
               this.show = false
               this.isNoPay = false
             } else if (status === '30') { // 失败
-              Toast('支付失败，请重新支付')
+              this.$toast('支付失败，请重新支付')
               this.show = false
             } else if (status === '50') { // 处理中
-              Toast('正在处理中，请稍后再试')
+              this.$toast('正在处理中，请稍后再试')
             }
           }
         })
@@ -262,13 +252,13 @@ export default {
         function (res) {
           // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回ok，但并不保证它绝对可靠。
           if (res.err_msg === 'get_brand_wcpay_request:ok') { // 支付成功后的操作
-            Toast('微信支付成功')
+            this.$toast('微信支付成功')
             that.isDisabledSubmitBtn = true
           } else if (res.err_msg === 'get_brand_wcpay_request:cancel') { // 取消支付的操作
-            Toast('用户取消支付')
+            this.$toast('用户取消支付')
             that.isDisabledSubmitBtn = false // 按钮恢复高亮
           } else { // 支付失败的操作
-            Toast('网络异常，请重试')
+            this.$toast('网络异常，请重试')
             that.isDisabledSubmitBtn = false // 按钮恢复高亮
           }
         }

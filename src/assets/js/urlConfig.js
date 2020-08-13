@@ -22,3 +22,5 @@ export const PRICE_LIST = '/app/user/im/price'
 export const PRICE_PAY = '/app/user/im/pay'
 // 查询支付结果
 export const PRICE_RESULT = '/app/user/product/getPayResult'
+// 支付产品
+export const PAY_PRODUCT = '/app/user/product/pay'
