@@ -22,6 +22,7 @@ export default {
   .error-page{
     width: 200px;
     margin: 30px auto 0;
+    text-align: center;
     p{
       margin-top: 20px;
     }
